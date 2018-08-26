@@ -13,10 +13,13 @@ import com.rolandoislas.drcsimclient.util.logging.Logger;
 import static com.rolandoislas.drcsimclient.Client.sockets;
 
 public class ControlTAS implements Control {
+	private static final int BYTES_PER_COMMAND = 2;
 	public static ControlTAS controlTAS;
 	//operation mode: 0=nothing, 1=dump, 2=replay
 	private byte mode;
 	private FileOutputStream outStream = null;
+	private FileInputStream inStream = null;
+	private int fileIndex = 0;
 	private Object buttonsLock;
 	private short buttons = 0;
 	private byte numUpdates = 0;
@@ -42,35 +45,67 @@ public class ControlTAS implements Control {
 				}
 				catch (IOException e) {
 					Logger.warn("Could not create controller dump file");
+					mode = 0;
+					return;
+				}
+			}
+			if(mode == 2) {
+				try {
+					inStream = new FileInputStream(Client.args.readPath);
+				}
+				catch (IOException e) {
+					Logger.warn("Could not read input file");
+					mode = 0;
+					return;
 				}
 			}
 			
 			threadPool = Executors.newScheduledThreadPool(1);
 			Tick tick = new Tick();
-			threadPool.scheduleAtFixedRate(tick, 0, (1000000000 / 60), TimeUnit.NANOSECONDS);
+			threadPool.scheduleAtFixedRate(tick, 100000000, (1000000000 / 60), TimeUnit.NANOSECONDS);
 		}
 	}
 
 	private class Tick implements Runnable {
-
 		@Override
 		public void run() {
-			ByteBuffer buffer = ByteBuffer.allocate(2);
-
-			// Logic goes here
-			synchronized(buttonsLock) {
-				buffer.putShort(buttons);
-				if(numUpdates > 0) {
-					numUpdates = 0;
-					buttons = 0;
+			long start = System.nanoTime();
+			ByteBuffer buffer = ByteBuffer.allocate(BYTES_PER_COMMAND);
+			if(mode == 1) {
+				synchronized(buttonsLock) {
+					buffer.putShort(buttons);
+					if(numUpdates > 0) {
+						numUpdates = 0;
+						buttons = 0;
+					}
+				}
+				try {
+					outStream.write(buffer.array());
+				}
+				catch (IOException e) {
+					Logger.warn("Error writing bytes to dump file");
 				}
 			}
-			try {
-				outStream.write(buffer.array());
+			if(mode == 2) {
+				byte[] read = new byte[BYTES_PER_COMMAND];
+				try {
+					if(inStream.available() == 0) {
+						Logger.info("Reached end of input file");
+						threadPool.shutdown();
+						inStream.close();
+						return;
+					}
+					inStream.read(read, fileIndex, BYTES_PER_COMMAND);
+					buffer.put(read);
+					buffer.position(0);
+					short buttons = buffer.getShort();
+					sockets.sendButtonInput(buttons);
+				}
+				catch (IOException e) {
+					Logger.warn("Error reading bytes from file");
+				}
 			}
-			catch (IOException e) {
-				Logger.warn("Error writing bytes to dump file");
-			}
+			//System.out.printf("%8d\n", System.nanoTime() - start);
 		}
 	}
 
@@ -78,6 +113,8 @@ public class ControlTAS implements Control {
 	public void update() { }
 	
 	public void dumpHookButtons(short buttons) {
+		if(mode == 0)
+			return;
 		synchronized(buttonsLock) {
 			this.buttons |= buttons;
 			numUpdates++;
