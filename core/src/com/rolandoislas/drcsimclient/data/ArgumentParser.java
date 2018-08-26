@@ -3,6 +3,8 @@ package com.rolandoislas.drcsimclient.data;
 import java.util.Arrays;
 import java.util.List;
 
+import com.rolandoislas.drcsimclient.util.logging.Logger;
+
 /**
  * Created by Rolando on 2/18/2017.
  */
@@ -13,6 +15,8 @@ public class ArgumentParser {
 	public final boolean logExtra;
 	public final boolean logVerbose;
 	public final boolean touchControl;
+	public final String dumpPath;
+	public final String readPath;
 
     public ArgumentParser(String[] args) {
 		argsList = Arrays.asList(args);
@@ -23,6 +27,13 @@ public class ArgumentParser {
 		logExtra = hasOption("-e", "--extra", "-f", "--finer");
 		logVerbose = hasOption("-v", "--verbose");
 		touchControl = hasOption("--touch");
+		dumpPath = getArgAfter("--dump");
+		readPath = getArgAfter("--replay");
+		
+		if(!(dumpPath.isEmpty()) && !(readPath.isEmpty())) {
+			System.out.printf("Cannot dump and replay at the same time!\n");
+			System.exit(1);
+		}
 	}
 
 	private void showHelp() {
@@ -37,6 +48,9 @@ public class ArgumentParser {
 		System.out.printf("\t-e, --extra: extra logging\n");
 		System.out.printf("\t-f, --finer: most details are logged\n");
 		System.out.printf("\t-v, --verbose: console spam\n");
+		System.out.printf("\nTASBot Stuff\n");
+		System.out.printf("--dump [<file path>]: dump controller input out to file !!WILL OVERWRITE EXISTING FILE IF PRESENT!!\n");
+		System.out.printf("--replay [<file path>]: replay controller recording from file\n");
 		System.exit(1);
 	}
 

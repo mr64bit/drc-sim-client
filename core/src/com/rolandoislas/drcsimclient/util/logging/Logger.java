@@ -34,7 +34,7 @@ public class Logger {
         try {
             if (Constants.PATH_LOG.mkdirs())
                 debug("Created log directory");
-            FileHandler fileHandler = new FileHandler(logFile.getAbsolutePath());
+            FileHandler fileHandler = new FileHandler(logFile.getAbsolutePath(), true);
             fileHandler.setLevel(level);
             fileHandler.setFormatter(new LogFormatter());
             logger.addHandler(fileHandler);

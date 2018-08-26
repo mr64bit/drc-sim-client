@@ -7,6 +7,7 @@ import com.rolandoislas.drcsimclient.Client;
 import com.rolandoislas.drcsimclient.control.Control;
 import com.rolandoislas.drcsimclient.control.ControlController;
 import com.rolandoislas.drcsimclient.control.ControlKeyboard;
+import com.rolandoislas.drcsimclient.control.ControlTAS;
 import com.rolandoislas.drcsimclient.control.ControlTouch;
 import com.rolandoislas.drcsimclient.data.ArgumentParser;
 import com.rolandoislas.drcsimclient.data.Constants;
@@ -26,11 +27,12 @@ public class DesktopLauncher {
 		config.addIcon("image/icon-32.png", Files.FileType.Internal);
 		config.addIcon("image/icon-16.png", Files.FileType.Internal);
 		ArgumentParser argParser = new ArgumentParser(arg);
-		Control[] controls = new Control[argParser.touchControl ? 3 : 2];
+		Control[] controls = new Control[argParser.touchControl ? 4 : 3];
 		controls[0] = new ControlKeyboard();
 		controls[1] = new ControlController();
+		controls[2] = new ControlTAS();
 		if (argParser.touchControl)
-			controls[2] = new ControlTouch();
+			controls[3] = new ControlTouch();
 		new LwjglApplication(new Client(controls, new Audio(), argParser), config);
 	}
 }

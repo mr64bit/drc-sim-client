@@ -10,6 +10,7 @@ import com.rolandoislas.drcsimclient.Client;
 import com.rolandoislas.drcsimclient.audio.AudioThread;
 import com.rolandoislas.drcsimclient.config.ConfigGeneral;
 import com.rolandoislas.drcsimclient.control.Control;
+import com.rolandoislas.drcsimclient.control.ControlTAS;
 import com.rolandoislas.drcsimclient.data.Constants;
 import com.rolandoislas.drcsimclient.graphics.VideoThread;
 import com.rolandoislas.drcsimclient.net.CommandThread;
@@ -149,6 +150,7 @@ public class StageControl extends Stage {
 	@Override
 	public void dispose() {
 		super.dispose();
+		ControlTAS.controlTAS.dispose();
 		wiiImage.dispose();
 		spritebatch.dispose();
 		audioThread.dispose();

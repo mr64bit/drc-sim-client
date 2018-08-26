@@ -80,6 +80,7 @@ public class ControlController implements Control {
 			axes[2] = getJoystickInput(controller, config.joystickRightX);
 			axes[3] = getJoystickInput(controller, config.joystickRightY) * -1;
 		}
+		ControlTAS.controlTAS.dumpHookButtons(buttonBits);
 		sockets.sendButtonInput(buttonBits);
 		sockets.sendExtraButtonInput(extraButtonBits);
 		sockets.sendJoystickInput(axes);

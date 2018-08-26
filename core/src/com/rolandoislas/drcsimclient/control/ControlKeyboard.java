@@ -4,6 +4,7 @@ import com.badlogic.gdx.Gdx;
 import com.rolandoislas.drcsimclient.config.ConfigKeyboard;
 import com.rolandoislas.drcsimclient.data.Constants;
 import com.rolandoislas.drcsimclient.stage.StageControl;
+import com.rolandoislas.drcsimclient.control.ControlTAS;
 
 import static com.rolandoislas.drcsimclient.Client.sockets;
 
@@ -53,6 +54,7 @@ public class ControlKeyboard implements Control {
 			buttonbits |= Constants.BUTTON_PLUS;
 		if (Gdx.input.isKeyPressed(config.buttonHome.getInput()))
 			buttonbits |= Constants.BUTTON_HOME;
+		ControlTAS.controlTAS.dumpHookButtons(buttonbits);
 		sockets.sendButtonInput(buttonbits);
 		// Extra
 		short extraButtonBits = 0;
